@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ToneShift</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <div class="header">
+      <h1 class="title">
+        <span class="logo">🎭</span>
+        ToneShift
+      </h1>
+      <button id="settingsBtn" class="settings-btn" title="Settings">⚙️</button>
+    </div>
+
+    <!-- Settings Panel (Hidden by default) -->
+    <div id="settingsPanel" class="settings-panel hidden">
+      <h3>API Configuration</h3>
+      <div class="input-group">
+        <label for="apiKey">Anthropic API Key:</label>
+        <input type="password" id="apiKey" placeholder="sk-ant-..." class="api-key-input">
+        <button id="saveApiKey" class="save-btn">Save</button>
+      </div>
+      <p class="api-info">
+        Get your API key from <a href="https://console.anthropic.com/" target="_blank">Anthropic Console</a>
+      </p>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="main-content">
+      <!-- Input Section -->
+      <div class="input-section">
+        <label for="inputText">Text to transform:</label>
+        <textarea 
+          id="inputText" 
+          placeholder="Select text on any webpage or paste your text here..."
+          class="text-input"
+          maxlength="2000"
+        ></textarea>
+        <div class="char-counter">
+          <span id="charCount">0</span>/2000
+        </div>
+      </div>
+
+      <!-- Tone Selection -->
+      <div class="tone-section">
+        <label>Choose a tone:</label>
+        <div class="tone-grid">
+          <button class="tone-btn" data-tone="professional">
+            <span class="tone-icon">💼</span>
+            Professional
+          </button>
+          <button class="tone-btn" data-tone="happy">
+            <span class="tone-icon">😊</span>
+            Happy
+          </button>
+          <button class="tone-btn" data-tone="excited">
+            <span class="tone-icon">🚀</span>
+            Excited
+          </button>
+          <button class="tone-btn" data-tone="angry">
+            <span class="tone-icon">😠</span>
+            Angry
+          </button>
+          <button class="tone-btn" data-tone="sarcastic">
+            <span class="tone-icon">😏</span>
+            Sarcastic
+          </button>
+          <button class="tone-btn" data-tone="formal">
+            <span class="tone-icon">🎓</span>
+            Formal
+          </button>
+          <button class="tone-btn" data-tone="casual">
+            <span class="tone-icon">😎</span>
+            Casual
+          </button>
+          <button class="tone-btn" data-tone="friendly">
+            <span class="tone-icon">🤝</span>
+            Friendly
+          </button>
+        </div>
+      </div>
+
+      <!-- Transform Button -->
+      <button id="transformBtn" class="transform-btn" disabled>
+        <span class="btn-text">Transform Text</span>
+        <div class="loading-spinner hidden"></div>
+      </button>
+
+      <!-- Output Section -->
+      <div id="outputSection" class="output-section hidden">
+        <label>Transformed text:</label>
+        <div class="output-container">
+          <div id="outputText" class="output-text"></div>
+          <div class="output-actions">
+            <button id="copyBtn" class="action-btn copy-btn">
+              <span class="btn-icon">📋</span>
+              Copy
+            </button>
+            <button id="replaceBtn" class="action-btn replace-btn hidden">
+              <span class="btn-icon">🔄</span>
+              Replace on Page
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- History Section -->
+      <div id="historySection" class="history-section hidden">
+        <div class="history-header">
+          <label>Recent transformations:</label>
+          <button id="clearHistory" class="clear-btn">Clear</button>
+        </div>
+        <div id="historyList" class="history-list"></div>
+      </div>
+    </div>
+
+    <!-- Status Messages -->
+    <div id="statusMessage" class="status-message hidden">
+      <div class="status-content">
+        <span class="status-text"></span>
+        <button class="status-close">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
