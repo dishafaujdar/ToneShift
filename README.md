@@ -29,9 +29,9 @@ A powerful Chrome extension that transforms text into different tones using AI. 
 - View transformation history (last 5 transformations)
 - Clean, minimalist interface
 
-## Installation
+## Installation & Quick Start
 
-### From Source (Developer Mode)
+### Instant Setup (No API Key Needed!)
 
 1. **Download or Clone**
    ```bash
@@ -47,28 +47,38 @@ A powerful Chrome extension that transforms text into different tones using AI. 
    - Click "Load unpacked"
    - Select the `ToneShift` folder
 
-4. **Setup API Key**
-   - Click the extension icon in your browser toolbar
-   - Click the settings gear icon
-   - Enter your Anthropic API key
+4. **Start Using Immediately!**
+   - Click the extension icon and start transforming text
+   - Uses our provided API key for immediate access
+   - No configuration required!
+
+### Optional: Get Your Own API Key (Recommended)
+
+For unlimited usage and higher quotas:
+
+1. **Get Free Gemini API Key**
+   - Visit [Google AI Studio](https://aistudio.google.com/app/apikey)
+   - Sign in with Google account
+   - Click "Create API Key"
+   - Copy the key (starts with `AIza`)
+
+2. **Configure Extension**
+   - Click extension icon → Settings gear ⚙️
+   - Paste your API key
    - Click "Save"
 
-## Setup Instructions
+## API System & Costs
 
-### Getting an Anthropic API Key
+### 🎁 **Provided API (Free Trial)**
+- **Immediate access** - No setup required
+- **Limited quota** - Shared among all users
+- **Perfect for testing** the extension
 
-1. Visit [Anthropic Console](https://console.anthropic.com/)
-2. Sign up or log in to your account
-3. Navigate to "API Keys" section
-4. Click "Create Key"
-5. Copy the key (starts with `sk-ant-`)
-6. Paste it into the ToneShift settings
-
-### API Usage and Costs
-
-- Uses Anthropic's Claude 3 Haiku model
-- Typical cost: ~$0.0002-0.0005 per transformation (much cheaper than GPT!)
-- Set usage limits in your Anthropic account if needed
+### 🚀 **Your Own API Key (Recommended)**
+- **Google Gemini 1.5 Flash** - Fast and reliable
+- **FREE tier**: 15 requests/minute, 1,500 requests/day
+- **No credit card required** for basic usage
+- **Higher quotas available** with paid plans
 
 ## How to Use
 
@@ -114,7 +124,7 @@ ToneShift/
 
 ### Technologies Used
 - **Manifest V3** - Latest Chrome extension format
-- **Anthropic API** - Claude 3 Haiku for text transformation
+- **Google Gemini API** - Gemini 1.5 Flash for text transformation
 - **Chrome Storage API** - Settings and history persistence
 - **Chrome Tabs API** - Page interaction and text replacement
 
@@ -126,7 +136,7 @@ ToneShift/
 ## Privacy & Security
 
 ### Data Handling
-- **Text Processing**: Sent to Anthropic API for transformation only
+- **Text Processing**: Sent to Google Gemini API for transformation only
 - **No Data Storage**: Text is not stored on external servers
 - **Local Storage**: API keys and history stored locally in browser
 - **No Tracking**: No analytics or user tracking
@@ -146,13 +156,22 @@ ToneShift/
 
 ### Common Issues
 
+### Common Issues
+
+**"Our provided API quota is exhausted!"**
+- This means our shared API key has reached its daily limit
+- Simply get your own FREE Google Gemini API key
+- Visit [Google AI Studio](https://aistudio.google.com/app/apikey) and follow the setup
+- Your personal key gives you 1,500 free requests per day!
+
 **"Please configure your API key first"**
-- Go to settings (gear icon) and enter a valid Anthropic API key
-- Ensure the key starts with `sk-ant-` and is complete
+- This appears if both our provided key and your personal key are unavailable
+- Get a free API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
+- Paste it in settings (gear icon) and click "Save"
 
 **"Failed to transform text"**
 - Check your internet connection
-- Verify your API key is correct and has credits
+- If using your own API key, verify it's correct and has quota remaining
 - Try with shorter text (under 2000 characters)
 
 **"Failed to replace text on page"**
@@ -168,7 +187,7 @@ ToneShift/
 ### Performance Tips
 - Keep text under 1500 characters for faster processing
 - Clear history periodically to free up storage
-- Monitor your Anthropic API usage in their dashboard
+- Monitor your Google AI Studio quota usage
 
 ## Development
 
@@ -183,8 +202,8 @@ ToneShift/
 - Test thoroughly across different websites
 
 ### API Rate Limits
-The extension respects Anthropic's rate limits:
-- **Free tier**: 5 requests per minute
+The extension respects Google Gemini's rate limits:
+- **Free tier**: 15 requests per minute, 1,500 requests per day
 - **Paid tier**: Higher limits based on usage tier
 - Built-in error handling for rate limit responses
 
@@ -196,9 +215,9 @@ This project is open source. Feel free to modify and distribute according to the
 
 For support, bug reports, or feature requests:
 - Check the troubleshooting section above
-- Review Anthropic API documentation for API-related issues
+- Review Google AI Studio documentation for API-related issues
 - Ensure you're using a supported browser version
 
 ---
 
-**Note**: You'll need an Anthropic API key to use this extension. The extension will guide you through the setup process on first use.
+**Note**: You'll need a Google Gemini API key to use this extension. The extension will guide you through the setup process on first use.

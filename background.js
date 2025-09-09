@@ -109,34 +109,48 @@ class ToneShiftBackground {
         friendly: "Rewrite this text in a warm, friendly tone that feels welcoming and approachable."
       };
 
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      // Try provided API key first, then user's API key if available
+      const keyToUse = apiKey || await this.getProvidedApiKey();
+      
+      if (!keyToUse) {
+        throw new Error('NO_API_KEY');
+      }
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${keyToUse}`, {
         method: 'POST',
         headers: {
-          'x-api-key': apiKey,
-          'Content-Type': 'application/json',
-          'anthropic-version': '2023-06-01'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'claude-3-haiku-20240307',
-          max_tokens: 500,
-          messages: [
-            {
-              role: 'user',
-              content: `You are a text transformation assistant. ${prompts[tone]} Return only the rewritten text without any additional commentary or explanations.
+          contents: [{
+            parts: [{
+              text: `You are a text transformation assistant. ${prompts[tone]} Return only the rewritten text without any additional commentary or explanations.
 
 Text to transform: ${text}`
-            }
-          ]
+            }]
+          }],
+          generationConfig: {
+            maxOutputTokens: 500,
+            temperature: 0.7,
+            topP: 0.8,
+            topK: 40
+          }
         })
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        
+        // If using provided API and it fails due to quota, suggest user API
+        if (!apiKey && (response.status === 429 || response.status === 403)) {
+          throw new Error('PROVIDED_API_QUOTA_EXCEEDED');
+        }
+        
         throw new Error(errorData.error?.message || `API error: ${response.status}`);
       }
 
       const data = await response.json();
-      const transformedText = data.content[0]?.text?.trim();
+      const transformedText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
 
       if (!transformedText) {
         throw new Error('No transformed text received from API');
@@ -147,6 +161,19 @@ Text to transform: ${text}`
       console.error('Transform API error:', error);
       return { success: false, error: error.message };
     }
+  }
+
+  async getProvidedApiKey() {
+    // REPLACE THIS WITH YOUR ACTUAL GOOGLE GEMINI API KEY
+    // This key is provided for users to try the extension immediately
+    // Get your free key from: https://aistudio.google.com/app/apikey
+    const providedKey = 'AIzaSyDummyKeyForDemo-ReplaceWithActualKey';
+    
+    // Only return if it's a real key (not the dummy)
+    if (providedKey.startsWith('AIza') && !providedKey.includes('Dummy')) {
+      return providedKey;
+    }
+    return null;
   }
 
   async getSettings() {
@@ -225,8 +252,8 @@ Text to transform: ${text}`
       return false;
     }
     
-    // Anthropic API keys start with 'sk-ant-'
-    return apiKey.startsWith('sk-ant-') && apiKey.length > 20;
+    // Google Gemini API keys start with 'AIza' and are typically 39 characters long
+    return apiKey.startsWith('AIza') && apiKey.length >= 35;
   }
 
   // Utility method to sanitize text input

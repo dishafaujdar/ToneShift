@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "ToneShift - Text Tone Changer",
   "version": "1.0.0",
-  "description": "Transform text into different tones using Claude AI - professional, happy, excited, and more!",
+  "description": "Transform text into different tones using Google Gemini AI - professional, happy, excited, and more!",
   
   "permissions": [
     "activeTab",
@@ -11,7 +11,7 @@
   ],
   
   "host_permissions": [
-    "https://api.anthropic.com/*"
+    "https://generativelanguage.googleapis.com/*"
   ],
   
   "action": {

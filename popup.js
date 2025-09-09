@@ -71,10 +71,8 @@ class ToneShiftPopup {
       const result = await chrome.storage.sync.get(['apiKey']);
       if (result.apiKey) {
         document.getElementById('apiKey').value = result.apiKey;
-      } else {
-        // Show settings if no API key
-        this.toggleSettings(true);
       }
+      // Don't automatically show settings - users can use provided API first
     } catch (error) {
       console.error('Failed to load settings:', error);
     }
@@ -82,19 +80,20 @@ class ToneShiftPopup {
 
   async saveApiKey() {
     const apiKey = document.getElementById('apiKey').value.trim();
-    if (!apiKey) {
-      this.showStatus('Please enter a valid API key', 'error');
-      return;
-    }
-
-    if (!apiKey.startsWith('sk-ant-')) {
-      this.showStatus('Invalid API key format. Please use an Anthropic API key starting with sk-ant-', 'error');
+    
+    if (apiKey && !apiKey.startsWith('AIza')) {
+      this.showStatus('Invalid API key format. Please use a Google Gemini API key starting with AIza', 'error');
       return;
     }
 
     try {
-      await chrome.storage.sync.set({ apiKey });
-      this.showStatus('API key saved successfully!', 'success');
+      if (apiKey) {
+        await chrome.storage.sync.set({ apiKey });
+        this.showStatus('Personal API key saved! You now have higher quota limits.', 'success');
+      } else {
+        await chrome.storage.sync.remove(['apiKey']);
+        this.showStatus('API key removed. You\'ll use our provided key (limited quota).', 'success');
+      }
       this.toggleSettings(false);
     } catch (error) {
       this.showStatus('Failed to save API key', 'error');
@@ -180,77 +179,91 @@ class ToneShiftPopup {
     const text = document.getElementById('inputText').value.trim();
     if (!text || !this.selectedTone) return;
 
-    // Check API key
-    const result = await chrome.storage.sync.get(['apiKey']);
-    if (!result.apiKey) {
-      this.showStatus('Please configure your API key first', 'error');
-      this.toggleSettings(true);
-      return;
-    }
-
     this.setLoading(true);
 
     try {
-      const transformedText = await this.callTransformAPI(text, this.selectedTone, result.apiKey);
+      // First try with user's API key if available
+      const result = await chrome.storage.sync.get(['apiKey']);
+      let transformResult;
       
-      if (transformedText) {
-        this.displayResult(transformedText);
-        await this.saveToHistory(text, transformedText, this.selectedTone);
+      if (result.apiKey) {
+        // User has their own API key
+        transformResult = await this.callTransformAPI(text, this.selectedTone, result.apiKey);
+      } else {
+        // Try with provided API key (fallback)
+        transformResult = await this.callTransformAPI(text, this.selectedTone, null);
+      }
+      
+      if (transformResult) {
+        this.displayResult(transformResult);
+        await this.saveToHistory(text, transformResult, this.selectedTone);
         await this.loadHistory();
       }
     } catch (error) {
       console.error('Transform error:', error);
-      this.showStatus('Failed to transform text. Please try again.', 'error');
+      
+      if (error.message === 'PROVIDED_API_QUOTA_EXCEEDED') {
+        this.showQuotaExceededMessage();
+      } else if (error.message === 'NO_API_KEY') {
+        this.showStatus('Please configure your API key first', 'error');
+        this.toggleSettings(true);
+      } else {
+        this.showStatus('Failed to transform text. Please try again.', 'error');
+      }
     } finally {
       this.setLoading(false);
     }
   }
 
+  showQuotaExceededMessage() {
+    const message = `
+      <div style="text-align: left;">
+        <strong>🚀 Our provided API quota is exhausted!</strong><br><br>
+        <strong>Good news:</strong> You can get your own FREE Google Gemini API key!<br><br>
+        <strong>Benefits:</strong><br>
+        • 1,500 free requests per day<br>
+        • 15 requests per minute<br>
+        • No credit card required<br><br>
+        <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #3b82f6; text-decoration: underline;">
+          Click here to get your free API key →
+        </a><br><br>
+        Then paste it in the settings below!
+      </div>
+    `;
+    
+    document.getElementById('statusMessage').innerHTML = `
+      <div class="status-message info" style="white-space: normal; line-height: 1.4;">
+        <span class="status-text">${message}</span>
+        <button class="status-close" onclick="this.parentElement.parentElement.classList.add('hidden')">×</button>
+      </div>
+    `;
+    
+    document.getElementById('statusMessage').classList.remove('hidden');
+    this.toggleSettings(true);
+  }
+
   async callTransformAPI(text, tone, apiKey) {
-    const prompts = {
-      professional: "Rewrite this text in a professional, business-appropriate tone while maintaining the original meaning and key information.",
-      happy: "Rewrite this text with a happy, positive, and upbeat tone while keeping the original message intact.",
-      excited: "Rewrite this text with high energy and excitement while preserving the core message.",
-      angry: "Rewrite this text with an angry, frustrated tone while maintaining the original intent.",
-      sarcastic: "Rewrite this text with a sarcastic, witty tone while keeping the main points clear.",
-      formal: "Rewrite this text in a formal, academic tone suitable for professional documents.",
-      casual: "Rewrite this text in a casual, conversational tone as if talking to a friend.",
-      friendly: "Rewrite this text in a warm, friendly tone that feels welcoming and approachable."
-    };
-
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': apiKey,
-        'Content-Type': 'application/json',
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-3-haiku-20240307',
-        max_tokens: 500,
-        messages: [
-          {
-            role: 'user',
-            content: `You are a text transformation assistant. ${prompts[tone]} Return only the rewritten text without any additional commentary or explanations.
-
-Text to transform: ${text}`
+    // Use background script for API calls to handle both provided and user keys
+    return new Promise((resolve, reject) => {
+      chrome.runtime.sendMessage({
+        action: 'transformText',
+        text: text,
+        tone: tone,
+        apiKey: apiKey
+      }, (response) => {
+        if (response.success) {
+          resolve(response.transformedText);
+        } else {
+          if (response.error === 'PROVIDED_API_QUOTA_EXCEEDED') {
+            reject(new Error('PROVIDED_API_QUOTA_EXCEEDED'));
+          } else if (response.error === 'NO_API_KEY') {
+            reject(new Error('NO_API_KEY'));
+          } else {
+            reject(new Error(response.error || 'Unknown error'));
           }
-        ]
-      })
+        }
+      });
     });
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        throw new Error('Invalid API key');
-      } else if (response.status === 429) {
-        throw new Error('Rate limit exceeded');
-      } else {
-        throw new Error(`API error: ${response.status}`);
-      }
-    }
-
-    const data = await response.json();
-    return data.content[0]?.text?.trim();
   }
 
   displayResult(transformedText) {

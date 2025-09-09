@@ -19,14 +19,19 @@
 
     <!-- Settings Panel (Hidden by default) -->
     <div id="settingsPanel" class="settings-panel hidden">
-      <h3>API Configuration</h3>
+      <h3>API Configuration (Optional)</h3>
+      <div class="api-explanation">
+        <p><strong>🎁 Free Trial:</strong> You can use ToneShift immediately with our provided API!</p>
+        <p><strong>🚀 Upgrade:</strong> Get your own API key for unlimited usage:</p>
+      </div>
       <div class="input-group">
-        <label for="apiKey">Anthropic API Key:</label>
-        <input type="password" id="apiKey" placeholder="sk-ant-..." class="api-key-input">
+        <label for="apiKey">Your Google Gemini API Key (Optional):</label>
+        <input type="password" id="apiKey" placeholder="AIza... (leave empty to use our provided key)" class="api-key-input">
         <button id="saveApiKey" class="save-btn">Save</button>
       </div>
       <p class="api-info">
-        Get your API key from <a href="https://console.anthropic.com/" target="_blank">Anthropic Console</a>
+        <strong>Get your FREE API key:</strong> <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a><br>
+        <small>• 1,500 free requests/day • No credit card required</small>
       </p>
     </div>
 
